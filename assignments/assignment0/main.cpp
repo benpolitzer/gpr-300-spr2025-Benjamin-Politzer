@@ -31,12 +31,20 @@ ew::Camera camera;
 ew::Transform monkeyTransform;
 ew::CameraController cameraController;
 
+struct Material {
+	float Ka = 1.0;
+	float Kd = 0.5;
+	float Ks = 0.5;
+	float Shininess = 128;
+}material;
+
+
 int main() {
 	GLFWwindow* window = initWindow("Assignment 0", screenWidth, screenHeight);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-	
+
 	//Texture list
-	GLuint brickTexture = ew::loadTexture("assets/brick_color.jpg"); 
+	GLuint brickTexture = ew::loadTexture("assets/brick_color.jpg");
 	GLuint woodTexture = ew::loadTexture("assets/wood_color.jpg");
 	GLuint goldTexture = ew::loadTexture("assets/gold_color.jpg");
 
@@ -76,8 +84,15 @@ int main() {
 		glBindTexture(GL_TEXTURE_2D, currentTexture);
 
 		//RENDER
-		glClearColor(0.6f,0.8f,0.92f,1.0f);
+		glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		shader.setVec3("_EyePos", camera.position);
+
+		shader.setFloat("_Material.Ka", material.Ka);
+		shader.setFloat("_Material.Kd", material.Kd);
+		shader.setFloat("_Material.Ks", material.Ks);
+		shader.setFloat("_Material.Shininess", material.Shininess);
 
 		shader.use();
 		shader.setInt("_MainTex", 0);
@@ -119,6 +134,13 @@ void drawUI() {
 	if (ImGui::Button("Change Texture")) {
 		changeTexture();
 	}
+	if (ImGui::CollapsingHeader("Material")) {
+		ImGui::SliderFloat("AmbientK", &material.Ka, 0.0f, 1.0f);
+		ImGui::SliderFloat("DiffuseK", &material.Kd, 0.0f, 1.0f);
+		ImGui::SliderFloat("SpecularK", &material.Ks, 0.0f, 1.0f);
+		ImGui::SliderFloat("Shininess", &material.Shininess, 2.0f, 1024.0f);
+	}
+
 	//Add more camera settings here!
 	ImGui::End();
 
@@ -170,4 +192,3 @@ GLFWwindow* initWindow(const char* title, int width, int height) {
 
 	return window;
 }
-
